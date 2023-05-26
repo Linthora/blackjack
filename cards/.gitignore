@@ -1,0 +1,14 @@
+build
+build/**/*.class
+
+buildTest
+buildTest/**/*.class
+
+dist
+dist/**
+
+.classpath
+.project
+
+result.*
+testResults

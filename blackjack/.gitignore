@@ -1,0 +1,8 @@
+build
+buildTest
+assets
+dist
+testResults
+lib/cards*.jar
+
+**.class

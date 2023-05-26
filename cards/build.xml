@@ -1,0 +1,197 @@
+pp<?xml version="1.0" encoding="UTF-8"?>
+<project name="cards" default="run" basedir=".">
+
+
+	<property name="app.name" value="cards"/>
+	<property name="app.version" value="1.0"/>
+	<property name="app.fullname" value="${app.name}-${app.version}"/>
+	<property name="build.home" value="${basedir}/build"/>
+	<property name="build.test.home" value="${basedir}/buildTest"/>
+	<property name="results.test" value="${basedir}/testResults"/>
+
+	<property name="dist.home" value="${basedir}/dist"/>
+	<property name="docs.home" value="${basedir}/docs"/>
+	<property name="src.home" value="${basedir}/src"/>
+	<property name="src.test.home" value="${basedir}/test"/>
+
+	<property name="lib.home" value="${basedir}/lib"/>
+
+    <property name="javac.encoding" value="UTF-8"/>
+
+
+
+	<!-- ==================== Compile options =========================== -->
+
+	<property name="compile.debug" value="true"/>
+	<property name="compile.deprecation" value="false"/>
+	<property name="compile.optimize" value="true"/>
+
+
+	<!-- ==================== Compilation Classpath =========================== -->
+
+	<path id="compile.classpath">
+		<fileset dir="${lib.home}">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+
+	<!-- ==================== All Target ====================================== -->
+
+
+	<target name="all" depends="clean,compile" description="Clean build and dist directories, then compile"/>
+
+	<!-- ==================== Clean Target ==================================== -->
+
+	<target name="clean" description="Delete old build and dist directories">
+		<delete dir="${build.home}"/>
+		<delete dir="${build.test.home}"/>
+		<delete dir="${dist.home}"/>
+		<delete dir="${results.test}"/>
+	</target>
+
+	<!-- ==================== Prepare Target ================================== -->
+
+	<target name="prepare">
+
+		<mkdir dir="${build.home}"/>
+		<mkdir dir="${build.test.home}"/>
+		<mkdir dir="${dist.home}"/>
+		<mkdir dir="${results.test}"/>
+
+	</target>
+
+	<!-- ==================== Compile Target ================================== -->
+
+	<target name="compile" depends="prepare" description="Compile Java sources">
+
+		<javac srcdir="${src.home}" destdir="${build.home}" debug="${compile.debug}" deprecation="${compile.deprecation}" optimize="${compile.optimize}"  encoding="${javac.encoding}" includeantruntime="false">
+
+			<classpath refid="compile.classpath"/>
+
+		</javac>
+
+
+		<javac srcdir="${src.test.home}" destdir="${build.test.home}" includeantruntime="false">
+			<classpath>
+				<pathelement location="${build.home}"/>
+				<path refid="compile.classpath"/>
+			</classpath>
+
+		</javac>
+
+		<!-- Copy application resources -->
+		<copy todir="${build.home}">
+			<fileset dir="${src.home}" excludes="**/*.java"/>
+		</copy>
+
+	</target>
+
+
+	<!-- ==================== Dist Target ===================================== -->
+
+
+	<target name="dist" depends="clean,compile,javadoc" description="Create binary distribution">
+
+		<copy todir="${dist.home}/assets">
+			<fileset dir="${basedir}/assets"/>
+		</copy>
+
+		<!-- Create application JAR file -->
+		<jar jarfile="${dist.home}/${app.fullname}.jar" basedir="${build.home}">
+			<manifest>
+				<attribute name="Main-Class" value="demo.Demo"/>
+				<attribute name="Class-Path" value="."/>
+			</manifest>
+		</jar>
+
+		<!-- Attention : copie ad-hoc pour satisfaire immédiatement une mise à jour de dépendance, car le projet "blackjack" a besoin de cette librairie -->
+		<copy file="${dist.home}/${app.fullname}.jar" todir="${basedir}/../blackjack/lib"/>
+
+		<copy todir="${basedir}/../blackjack/assets">
+			<fileset dir="${dist.home}/assets"/>
+		</copy>
+
+	</target>
+
+
+	<!-- ==================== Javadoc Target ================================== -->
+
+
+	<target name="javadoc" depends="compile" description="Create Javadoc API documentation">
+
+		<mkdir dir="${dist.home}/docs/api"/>
+
+		<javadoc sourcepath="${src.home}" destdir="${dist.home}/docs/api" packagenames="*">
+
+			<classpath>
+				<fileset dir="${lib.home}">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+
+		</javadoc>
+
+
+	</target>
+
+
+
+	<!-- ==================== Run Ttestarget ================================== -->
+
+	<target name="run" depends="dist">
+		<java jar="${dist.home}/${app.fullname}.jar" fork="true"/>
+	</target>
+
+	<!-- ==================== Run English ================================== -->
+
+	<target name="run-english" depends="dist">
+		<java jar="${dist.home}/${app.fullname}.jar" fork="true">
+			<jvmarg value="-Duser.language=en"/>
+		</java>
+	</target>
+
+
+
+	<!-- ==================== Test Target ===================================== -->
+
+
+
+	<target name="test" depends="clean,compile">
+
+		<junit printsummary="withOutAndErr" haltonfailure="yes" fork="yes" showoutput="yes"> <!-- "withOutAndErr" -->
+
+			<classpath>
+				<pathelement location="${build.test.home}"/>
+				<pathelement location="${build.home}"/>
+
+				<path refid="compile.classpath"/>
+			</classpath>
+
+			<test name="test.CardTest" haltonfailure="yes" outfile="testResults/resultCard" >
+				<formatter type="plain"/>
+				<formatter type="xml"/>
+			</test>
+
+			<test name="test.DeckTest" haltonfailure="yes" outfile="testResults/resultDeck" >
+				<formatter type="plain"/>
+				<formatter type="xml"/>
+			</test>
+
+			<test name="test.ProxiesTests" haltonfailure="yes" outfile="testResults/resultProxies" >
+				<formatter type="plain"/>
+				<formatter type="xml"/>
+			</test>
+
+			<test name="test.ClassicDeckFactoryTest" haltonfailure="yes" outfile="testResults/resultClassicDeckFactory" >
+				<formatter type="plain"/>
+				<formatter type="xml"/>
+			</test>
+
+			<test name="test.BoardTest" haltonfailure="yes" outfile="testResults/resultBoardnew RealDeck(null, null, null, null, 0, false)" >
+				<formatter type="plain"/>
+				<formatter type="xml"/>
+			</test>
+		</junit>
+	</target>
+
+</project>
